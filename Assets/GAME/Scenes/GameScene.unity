@@ -267,8 +267,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d40afea795a3114b937a59dcc10789f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cursorController: {fileID: 1222324842}
-  movementSpeed: 5
+  CursorController: {fileID: 1222324842}
+  MovementSpeed: 2
 --- !u!1 &460703695
 GameObject:
   m_ObjectHideFlags: 0
