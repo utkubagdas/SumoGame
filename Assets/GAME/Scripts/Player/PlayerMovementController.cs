@@ -8,9 +8,29 @@ public class PlayerMovementController : MonoBehaviour
     [SerializeField] private CursorController CursorController;
     private float _startYPos;
     
-    [SerializeField] private float _movementSpeed = 2f;
+    [SerializeField] private float _movementSpeed = 0.1f;
+
+    [HideInInspector] public bool IsFall;
+    
+    public bool IsControlable { get; private set; }
 
     public float MovementSpeed => _movementSpeed;
+    
+    private float _distToGround;
+    private RaycastHit _hit;
+    private float _raycastDistance = 100f;
+    [SerializeField] private LayerMask GroundLayer;
+    private bool _groundChecked;
+
+    private void OnEnable()
+    {
+        EventManager.OnLevelStart.AddListener(LevelStart);
+    }
+
+    private void OnDisable()
+    {
+        EventManager.OnLevelStart.RemoveListener(LevelStart);
+    }
 
     private void Start()
     {
@@ -19,6 +39,24 @@ public class PlayerMovementController : MonoBehaviour
 
     private void Update()
     {
+        if(Physics.Raycast(transform.position, Vector3.down, out _hit, _raycastDistance, GroundLayer)) 
+        {
+            
+        }
+        else if (!_groundChecked)
+        {
+            _groundChecked = true;
+            IsFall = true;
+            IsControlable = false;
+            Debug.Log("isfall true");
+        }
+        
+        if (!IsControlable)
+            return;
+        
+        if (IsFall)
+            return;
+        
         var position = transform.position;
         var tempPos = position;
         tempPos.y = _startYPos; // clamp the y so that the height does not distort
@@ -31,5 +69,16 @@ public class PlayerMovementController : MonoBehaviour
     public void BoostMovementSpeed(float boostAmount)
     {
         _movementSpeed += boostAmount;
+    }
+
+    private void LevelStart()
+    {
+        IsControlable = true;
+        IsFall = false;
+    }
+    
+    public void SetControlable(bool active)
+    {
+        IsControlable = active;
     }
 }

@@ -48,7 +48,7 @@ public class OpponentSpawner : MonoBehaviour
         for (int i = 0; i < OpponentCount; i++)
         {
             var opponent = Instantiate(OpponentPrefab);
-            opponent.transform.position = new Vector3(GetSpawnX(), 0, GetSpawnZ());
+            opponent.transform.position = new Vector3(GetSpawnX(), 1, GetSpawnZ());
             _opponentControllers.Add(opponent);
         }
 
@@ -56,5 +56,7 @@ public class OpponentSpawner : MonoBehaviour
         {
             opponent.SetAllOpponentList(_opponentControllers);   
         }
+        
+        EventManager.OnSpawnOpponents.Invoke(_opponentControllers.Count + 1);
     }
 }

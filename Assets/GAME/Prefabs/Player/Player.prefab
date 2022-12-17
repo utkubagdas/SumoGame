@@ -378,7 +378,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CursorController: {fileID: 2245126184627399890}
-  _movementSpeed: 4
+  _movementSpeed: 8
+  IsFall: 0
+  IsControlable: 0
 --- !u!136 &2245126186043520909
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -422,3 +424,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerMovementController: {fileID: 2245126186043520908}
+  Pushed: 0
+  GroundLayer:
+    serializedVersion: 2
+    m_Bits: 0

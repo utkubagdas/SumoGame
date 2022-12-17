@@ -125,8 +125,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 253895a2310e9904a8c686204246040a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MovementSpeedBoostAmount: 0.5
-  ScaleBoostAmount: 0.5
+  MovementSpeedBoostAmount: 0.1
+  ScaleBoostAmount: 0.1
 --- !u!54 &-543657471322303813
 Rigidbody:
   m_ObjectHideFlags: 0
