@@ -3,13 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    private static GameManager _instance;
-
-    public static GameManager Instance { get { return _instance; } }
-
+    #region Property
     public float LevelTime = 120f;
     
     public bool LevelStarted { get; private set; }
@@ -18,8 +17,15 @@ public class GameManager : MonoBehaviour
     public int RemainingSumoPlayer { get; private set; }
     
     public int Score { get; private set; }
+    #endregion
+    
+    #region Singleton Property
+    private static GameManager _instance;
 
+    public static GameManager Instance => _instance;
 
+    #endregion
+    
     private void OnEnable()
     {
         EventManager.OnLevelStart.AddListener(() => LevelStarted = true);
@@ -58,12 +64,25 @@ public class GameManager : MonoBehaviour
         
         if (RemainingSumoPlayer <= 1)
         {
-            EventManager.OnLevelSuccess.Invoke();
+            SetDelay(3f);
         }
     }
 
     private void IncreaseScore()
     {
         Score += 100;
+    }
+
+    private void SetDelay(float time)
+    {
+        StartCoroutine(SetDelayCo(time));
+    }
+
+    private IEnumerator SetDelayCo(float time)
+    {
+        yield return new WaitForSeconds(0.5f);
+        EventManager.OnLevelSuccess.Invoke();
+        yield return new WaitForSeconds(time);
+        SceneManager.LoadScene("GameScene");
     }
 }

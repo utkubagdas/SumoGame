@@ -5,18 +5,23 @@ using UnityEngine;
 
 public class OpponentController : MonoBehaviour
 {
-    public Transform WeakPoint;
-    public OpponentMovementController OpponentMovementController;
-    public List<OpponentController> OpponentControllers { get; } = new List<OpponentController>();
-
-    [HideInInspector] public bool Pushed;
+    #region Property
+    public bool Pushed { get; set; }
     public bool IsFall { get; private set; }
     private float _power = 1;
     public float Power => _power;
-
     public float ScaleBoost { get; private set; }
-
     public bool Eliminated { get; set; }
+    public bool PushedFromPlayer { get; set; }
+    
+    public bool IsDead { get; set; }
+    public List<OpponentController> OpponentControllers { get; } = new List<OpponentController>();
+    #endregion
+    
+    #region Public
+    public OpponentMovementController OpponentMovementController;
+    #endregion
+
 
     private void Start()
     {
@@ -40,16 +45,16 @@ public class OpponentController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("OutCollider") && Pushed)
+        if (other.CompareTag("OutCollider") && Pushed && !Eliminated)
         {
-            OpponentMovementController.NavMeshAgent.enabled = false;
-            IsFall = true;
-        }
-
-        if (other.CompareTag("FallCollider"))
-        {
-            IsFall = true;
+            Eliminated = true;
+            OpponentMovementController.Rigidbody.constraints = ~RigidbodyConstraints.FreezePosition;
             EventManager.OnFallOpponent.Invoke();
+            IsFall = true;
+            if (PushedFromPlayer)
+            {
+                EventManager.OnFallOpponentFromPlayer.Invoke();
+            }
         }
     }
 
@@ -62,8 +67,8 @@ public class OpponentController : MonoBehaviour
         if (opponentController != null && !Pushed)
         {
             if (Power < opponentController.Power) return;
-            
-            Debug.Log("push");
+
+            PushedFromPlayer = false;
             opponentController.Pushed = true;
             // Calculate Angle Between the collision point and the player
             Vector3 dir = other.contacts[0].point - transform.position;
@@ -72,8 +77,8 @@ public class OpponentController : MonoBehaviour
             // And finally we add force in the direction of dir and multiply it by force. 
             // This will push back the opponent
             dir.y = 0;
+            opponentController.OpponentMovementController.SetControlable(false);
             Rigidbody attachedRigidbody;
-            opponentController.OpponentMovementController.NavMeshAgent.enabled = false;
             (attachedRigidbody = other.collider.attachedRigidbody).AddForce(dir * 10, ForceMode.Impulse);
 
            
@@ -81,26 +86,26 @@ public class OpponentController : MonoBehaviour
             
         }
         
-        // if (playerController != null && !Pushed)
-        // {
-        //     if (Power <= playerController.Power) return;
-        //     
-        //     playerController.Pushed = true;
-        //     // Calculate Angle Between the collision point and the player
-        //     Vector3 dir = other.contacts[0].point - transform.position;
-        //     // We then get the opposite (-Vector3) and normalize it
-        //     dir = dir.normalized;
-        //     // And finally we add force in the direction of dir and multiply it by force. 
-        //     // This will push back the opponent
-        //     dir.y = 0;
-        //     Rigidbody attachedRigidbody;
-        //     playerController.PlayerMovementController.SetControlable(false);
-        //     (attachedRigidbody = other.collider.attachedRigidbody).AddForce(dir * 10, ForceMode.Impulse);
-        //
-        //    
-        //     StartCoroutine(ResetVelocityAfterDelayPlayer(1.5f, attachedRigidbody, playerController));
-        //     
-        // }
+        if (playerController != null && !Pushed)
+        {
+            if (Power <= playerController.Power) return;
+            
+            playerController.Pushed = true;
+            // Calculate Angle Between the collision point and the player
+            Vector3 dir = other.contacts[0].point - transform.position;
+            // We then get the opposite (-Vector3) and normalize it
+            dir = dir.normalized;
+            // And finally we add force in the direction of dir and multiply it by force. 
+            // This will push back the opponent
+            dir.y = 0;
+            Rigidbody attachedRigidbody;
+            playerController.PlayerMovementController.SetControlable(false);
+            (attachedRigidbody = other.collider.attachedRigidbody).AddForce(dir * 10, ForceMode.Impulse);
+        
+           
+            StartCoroutine(ResetVelocityAfterDelayPlayer(1.5f, attachedRigidbody, playerController));
+            
+        }
     }
 
     private IEnumerator ResetVelocityAfterDelay(float delayTime, Rigidbody rb, OpponentController opponentController)
@@ -117,7 +122,7 @@ public class OpponentController : MonoBehaviour
 
         if (!opponentController.IsFall)
         {
-            opponentController.OpponentMovementController.NavMeshAgent.enabled = true;
+            opponentController.OpponentMovementController.SetControlable(true);
         }
         opponentController.Pushed = false;
     }
@@ -139,19 +144,5 @@ public class OpponentController : MonoBehaviour
             playerController.PlayerMovementController.SetControlable(true);
         }
         playerController.Pushed = false;
-    }
-    
-    private void CheckFall()
-    {
-        StartCoroutine(CheckFallCo());
-    }
-
-    private IEnumerator CheckFallCo()
-    {
-        yield return new WaitForSeconds(3f);
-        if (!IsFall)
-        {
-            OpponentMovementController.NavMeshAgent.enabled = true;
-        }
     }
 }

@@ -7,12 +7,17 @@ using Unity.VisualScripting;
 
 public class PreGameUI : MonoBehaviour
 {
+    #region Serialized
     [SerializeField] private RectTransform ParentTransform;
     [SerializeField] private TextMeshProUGUI Timer;
     [SerializeField] private float TimeForStart = 3f;
+    #endregion
+    
+    #region Local
     private bool _canCount;
     private bool _levelStarted;
-
+    #endregion
+    
     private void Start()
     {
         _canCount = true;

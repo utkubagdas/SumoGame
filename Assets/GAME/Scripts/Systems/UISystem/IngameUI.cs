@@ -9,16 +9,21 @@ using UnityEngine.SceneManagement;
 
 public class IngameUI : MonoBehaviour
 {
+   #region Serialized
    [SerializeField] private RectTransform ParentTransform;
    [SerializeField] private TextMeshProUGUI ScoreText;
    [SerializeField] private TextMeshProUGUI TimerText;
    [SerializeField] private TextMeshProUGUI CounterText;
+   #endregion
+   
+   #region Local
    private int _opponentCount;
    private int _score;
    private float _minutes;
    private float _seconds;
    private float _timeLeft;
-
+   #endregion
+   
    private void OnEnable()
    {
       EventManager.OnSpawnOpponents.AddListener(SetOpponentCount);

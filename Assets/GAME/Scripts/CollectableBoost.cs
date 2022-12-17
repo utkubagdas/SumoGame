@@ -18,7 +18,7 @@ public class CollectableBoost : MonoBehaviour, ICollectable
     public void CollectForPlayer(PlayerController playerController)
     {
         playerController.BoostScale(ScaleBoostAmount);
-        playerController.PlayerMovementController.BoostMovementSpeed(MovementSpeedBoostAmount);
+        playerController.PlayerMovementController.BoostMovementSpeed(MovementSpeedBoostAmount / 10f);
     }
 
     private void OnTriggerEnter(Collider other)

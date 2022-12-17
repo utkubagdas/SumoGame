@@ -6,15 +6,19 @@ using Random = UnityEngine.Random;
 
 public class OpponentSpawner : MonoBehaviour
 {
-    [SerializeField] private OpponentController OpponentPrefab;
-    [SerializeField] private int OpponentCount = 5;
-    [SerializeField] private MeshRenderer GroundMesh;
+    #region Local
     private readonly List<OpponentController> _opponentControllers = new List<OpponentController>();
     private float _minX;
     private float _maxX;
     private float _minZ;
     private float _maxZ;
-
+    #endregion
+    
+    #region Serialized
+    [SerializeField] private OpponentController OpponentPrefab;
+    [SerializeField] private int OpponentCount = 5;
+    [SerializeField] private MeshRenderer GroundMesh;
+    #endregion
     private void Start()
     {
         AssignSpawnPointFields();

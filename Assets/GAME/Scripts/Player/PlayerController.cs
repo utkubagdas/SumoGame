@@ -8,14 +8,17 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
-    public PlayerMovementController PlayerMovementController;
+    #region Local
     private float _power = 1;
     public float Power => _power;
     public float ScaleBoost { get; private set; }
-    [HideInInspector] public bool Pushed;
-    //public bool IsFall { get; private set; }
+    public bool Pushed { get; set; }
     public bool Eliminated { get; set; }
+    #endregion
     
+    #region Public
+    public PlayerMovementController PlayerMovementController;
+    #endregion
     
     private void Start()
     {
@@ -30,31 +33,13 @@ public class PlayerController : MonoBehaviour
         ScaleBoost = localScale.x;
         _power += 0.1f;
     }
-
-    private void Update()
-    {
-        
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Vector3 dir = Vector3.down;
-        Gizmos.DrawRay(transform.position, dir);
-    }
-
+    
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("OutColliderForPlayer"))
-        {
-            PlayerMovementController.IsFall = true;
-        }
-        
         if (other.CompareTag("FallCollider"))
         {
-            PlayerMovementController.IsFall = true;
-            //SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
             EventManager.OnLevelFail.Invoke();
+            SetDelay(3f);
         }
     }
 
@@ -64,7 +49,9 @@ public class PlayerController : MonoBehaviour
 
         if (opponentController != null && !Pushed)
         {
-            Debug.Log("push");
+            if (Power < opponentController.Power) return;
+            
+            opponentController.PushedFromPlayer = true;
             opponentController.Pushed = true;
             // Calculate Angle Between the collision point and the player
             Vector3 dir = other.contacts[0].point - transform.position;
@@ -74,15 +61,14 @@ public class PlayerController : MonoBehaviour
             // This will push back the opponent
             dir.y = 0;
             Rigidbody attachedRigidbody = other.collider.attachedRigidbody;
-            opponentController.OpponentMovementController.NavMeshAgent.enabled = false;
-            attachedRigidbody.isKinematic = false;
+            opponentController.OpponentMovementController.SetControlable(false);
             attachedRigidbody.AddForce(dir * 20, ForceMode.Impulse);
             StartCoroutine(ResetVelocityAfterDelay(1.5f, attachedRigidbody, opponentController));
         }
         else if (other.collider.CompareTag("WeakPoint") && !Pushed)
         {
-            Debug.Log("weakpoint");
             OpponentController opponentController2 = other.collider.GetComponentInParent<OpponentController>();
+            opponentController2.PushedFromPlayer = true;
             opponentController2.Pushed = true;
             // Calculate Angle Between the collision point and the player
             Vector3 dir = other.contacts[0].point - transform.position;
@@ -92,34 +78,39 @@ public class PlayerController : MonoBehaviour
             // This will push back the opponent
             dir.y = 0;
             Rigidbody attachedRigidbody = opponentController2.GetComponent<Rigidbody>();
-            opponentController2.OpponentMovementController.NavMeshAgent.enabled = false;
-            attachedRigidbody.isKinematic = false;
-            attachedRigidbody.AddForce(dir * 40, ForceMode.Impulse);
-            StartCoroutine(ResetVelocityAfterDelay(1.5f, attachedRigidbody, opponentController2));
+            opponentController2.OpponentMovementController.SetControlable(false);
+            attachedRigidbody.AddForce(dir * 25, ForceMode.Impulse);
+            StartCoroutine(ResetVelocityAfterDelay(3f, attachedRigidbody, opponentController2));
         }
     }
 
     private IEnumerator ResetVelocityAfterDelay(float delayTime, Rigidbody rb, OpponentController opponentController)
     {
         yield return new WaitForSeconds(delayTime);
-        rb.velocity = Vector3.zero;
-        if (Power >= opponentController.Power && opponentController.IsFall && !opponentController.Eliminated)
+        //rb.velocity = Vector3.zero;
+        if (Power >= opponentController.Power && opponentController.IsFall)
         {
-            opponentController.Eliminated = true;
             _power += opponentController.Power;
-            BoostScale(opponentController.ScaleBoost / 2f);
-            PlayerMovementController.BoostMovementSpeed(opponentController.OpponentMovementController.MovementSpeed / 2f);
-            EventManager.OnFallOpponent.Invoke();
-            EventManager.OnFallOpponentFromPlayer.Invoke();
+            BoostScale(opponentController.ScaleBoost / 5f);
+            PlayerMovementController.BoostMovementSpeed(opponentController.OpponentMovementController.MovementSpeed / 10f);
         }
 
         if (!opponentController.IsFall)
         {
-            rb.isKinematic = true;
-            opponentController.OpponentMovementController.NavMeshAgent.enabled = true;
+            opponentController.OpponentMovementController.SetControlable(true);
         }
         opponentController.Pushed = false;
     }
+    
+    private void SetDelay(float time)
+    {
+        StartCoroutine(SetDelayCo(time));
+    }
 
+    private IEnumerator SetDelayCo(float time)
+    {
+        yield return new WaitForSeconds(time);
+        SceneManager.LoadScene("GameScene");
+    }
     
 }

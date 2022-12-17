@@ -6,10 +6,12 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
+    #region Serialized
     [SerializeField] private RectTransform IngameUI;
     [SerializeField] private RectTransform SuccessUI;
     [SerializeField] private RectTransform FailUI;
     [SerializeField] private RectTransform PreGameUI;
+    #endregion
 
     private void OnEnable()
     {

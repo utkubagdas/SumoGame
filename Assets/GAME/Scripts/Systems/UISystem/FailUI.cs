@@ -6,10 +6,12 @@ using TMPro;
 
 public class FailUI : MonoBehaviour
 {
+    #region Serialized
     [SerializeField] private RectTransform ParentTransform;
     [SerializeField] private TextMeshProUGUI RankText;
     [SerializeField] private TextMeshProUGUI ScoreText;
-
+    #endregion
+    
     private void OnEnable()
     {
         EventManager.OnLevelFail.AddListener(SetFailTexts);

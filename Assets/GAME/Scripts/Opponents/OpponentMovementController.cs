@@ -7,19 +7,26 @@ using UnityEngine.AI;
 
 public class OpponentMovementController : MonoBehaviour
 {
-    [SerializeField] private OpponentController OpponentController;
-    [SerializeField] private Rigidbody Rigidbody;
-    private Transform _targetTransform;
-    public NavMeshAgent NavMeshAgent;
-    private float _movementSpeed = 5f;
-    public float MovementSpeed => _movementSpeed;
+    #region Property
+    public bool IsControlable { get; private set; }
+    #endregion
     
-    public bool _hasTarget;
+    #region Serialized
     [SerializeField] private LayerMask BoostLayer;
-    private Collider[] hitColliders;
-
+    #endregion
+    
+    #region Local
+    private Transform _targetTransform;
+    private Collider[] _hitColliders;
+    private bool _hasTarget;
     private float _distance = Mathf.Infinity;
-
+    #endregion
+    
+    #region Public
+    public Rigidbody Rigidbody;
+    public float MovementSpeed = 5f;
+    #endregion
+    
     private void OnEnable()
     {
         EventManager.OnLevelStart.AddListener(LevelStart);
@@ -29,16 +36,14 @@ public class OpponentMovementController : MonoBehaviour
     {
         EventManager.OnLevelStart.RemoveListener(LevelStart);
     }
-
-    private void Start()
+    private void FixedUpdate()
     {
-        NavMeshAgent.speed = MovementSpeed;
-    }
-
-    private void Update()
-    {
-        if (!NavMeshAgent.enabled || !GameManager.Instance.LevelStarted)
+        if (!GameManager.Instance.LevelStarted || !IsControlable)
             return;
+
+        var tempPos = transform.position;
+        tempPos.y = 1.25f;
+        transform.position = tempPos;
         
         FindNearestBoost();
 
@@ -51,8 +56,14 @@ public class OpponentMovementController : MonoBehaviour
         {
             if (_targetTransform != null)
             {
-                if(NavMeshAgent.enabled)
-                    NavMeshAgent.destination = _targetTransform.position;
+                var position = _targetTransform.position;
+                var position1 = transform.position;
+                var dir  = (position - position1).normalized * MovementSpeed;
+                Rigidbody.velocity = dir;
+                var lookPos = position - position1;
+                lookPos.y = 0;
+                var rotation = Quaternion.LookRotation(lookPos);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * 5);
             }
             else
             {
@@ -89,11 +100,11 @@ public class OpponentMovementController : MonoBehaviour
     
     private Transform FindNearestBoost()
     {
-        hitColliders = Physics.OverlapSphere(transform.position + GetComponent<CapsuleCollider>().center, 50f, BoostLayer);
-        if (hitColliders.Length <= 0)
+        _hitColliders = Physics.OverlapSphere(transform.position + GetComponent<CapsuleCollider>().center, 100f, BoostLayer);
+        if (_hitColliders.Length <= 0)
             return null;
 
-        foreach (var hit in hitColliders)
+        foreach (var hit in _hitColliders)
         {
             var tempDistance = Vector3.Distance(transform.position, hit.transform.position);
             if (tempDistance < _distance)
@@ -108,8 +119,8 @@ public class OpponentMovementController : MonoBehaviour
 
     public void BoostMovementSpeed(float boostAmount)
     {
-        _movementSpeed += boostAmount;
-        NavMeshAgent.speed = _movementSpeed;
+        MovementSpeed += boostAmount;
+        //NavMeshAgent.speed = _movementSpeed;
     }
 
     private void OnDrawGizmos()
@@ -120,7 +131,11 @@ public class OpponentMovementController : MonoBehaviour
 
     private void LevelStart()
     {
-        NavMeshAgent.enabled = true;
-        //Rigidbody.isKinematic = false;
+        SetControlable(true);
     }
+    public void SetControlable(bool active)
+    {
+        IsControlable = active;
+    }
+    
 }
