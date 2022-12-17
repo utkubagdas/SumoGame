@@ -76,6 +76,8 @@ public class OpponentMovementController : MonoBehaviour
             _hasTarget = false;
         }
     }
+    
+    //to find other opponents and chase them
 
     // private Transform FindNearestOpponent()
     // {
@@ -97,6 +99,9 @@ public class OpponentMovementController : MonoBehaviour
     //     }
     //     return _targetTransform;
     // }
+    
+    //to collect collectible boosts
+    //in the example game they were mostly chasing boosts, so it's like this right now.
     
     private Transform FindNearestBoost()
     {
@@ -120,7 +125,6 @@ public class OpponentMovementController : MonoBehaviour
     public void BoostMovementSpeed(float boostAmount)
     {
         MovementSpeed += boostAmount;
-        //NavMeshAgent.speed = _movementSpeed;
     }
 
     private void OnDrawGizmos()
