@@ -12,7 +12,7 @@ public class PlayerMovementController : MonoBehaviour
     private float _distToGround;
     private bool _groundChecked;
     private RaycastHit _hit;
-    private float _raycastDistance = 100f;
+    private float _raycastDistance = 30f;
     #endregion
     
     #region Serialized
@@ -29,6 +29,8 @@ public class PlayerMovementController : MonoBehaviour
     #region Public
     public float MovementSpeed = 8;
     #endregion
+    
+   
     
     private void OnEnable()
     {
@@ -58,8 +60,9 @@ public class PlayerMovementController : MonoBehaviour
         {
             
         }
-        else if(!_groundChecked)
+        else if(!_groundChecked && !GameManager.Paused)
         {
+            Debug.Log("ground check false");
             _groundChecked = true;
             IsFall = true;
             SetControlable(false);

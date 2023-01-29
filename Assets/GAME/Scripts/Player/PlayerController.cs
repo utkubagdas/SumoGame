@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
             Rigidbody attachedRigidbody = opponentController2.GetComponent<Rigidbody>();
             opponentController2.OpponentMovementController.SetControlable(false);
             attachedRigidbody.AddForce(dir * 25, ForceMode.Impulse);
-            StartCoroutine(ResetVelocityAfterDelay(3f, attachedRigidbody, opponentController2));
+            StartCoroutine(ResetVelocityAfterDelay(1.5f, attachedRigidbody, opponentController2));
         }
     }
 

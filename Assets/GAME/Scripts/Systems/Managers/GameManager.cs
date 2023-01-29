@@ -26,6 +26,10 @@ public class GameManager : MonoBehaviour
 
     #endregion
     
+    #region Static
+    public static bool Paused;
+    #endregion
+    
     private void OnEnable()
     {
         EventManager.OnLevelStart.AddListener(() => LevelStarted = true);
